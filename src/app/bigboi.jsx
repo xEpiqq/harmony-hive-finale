@@ -1,12 +1,19 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, useSession, SessionProvider } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-export default function Bigboi({ user }) {
+const BigboiContent = ({ user }) => {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [isAuthenticated, setIsAuthenticated] = useState(!!user);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      setIsAuthenticated(true);
+    }
+  }, [status]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -14,30 +21,8 @@ export default function Bigboi({ user }) {
     }
   }, [isAuthenticated, router]);
 
-  const popupCenter = (url, title) => {
-    const dualScreenLeft = window.screenLeft ?? window.screenX;
-    const dualScreenTop = window.screenTop ?? window.screenY;
-
-    const width = window.innerWidth ?? document.documentElement.clientWidth ?? screen.width;
-    const height = window.innerHeight ?? document.documentElement.clientHeight ?? screen.height;
-
-    const systemZoom = width / window.screen.availWidth;
-
-    const left = (width - 500) / 2 / systemZoom + dualScreenLeft;
-    const top = (height - 550) / 2 / systemZoom + dualScreenTop;
-
-    const newWindow = window.open(
-      url,
-      title,
-      `width=${500 / systemZoom},height=${550 / systemZoom},top=${top},left=${left}`
-    );
-
-    const checkPopup = setInterval(() => {
-      if (newWindow.closed) {
-        clearInterval(checkPopup);
-        setIsAuthenticated(true); // Check authentication status
-      }
-    }, 500);
+  const handleSignIn = async () => {
+    await signIn('google');
   };
 
   return (
@@ -46,7 +31,7 @@ export default function Bigboi({ user }) {
         <div className="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
           <div className="mt-6 grid grid-cols-1 gap-4">
             <button
-              onClick={() => popupCenter("/google-signin", "Sample Sign In")}
+              onClick={handleSignIn}
               className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent"
             >
               <svg className="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24">
@@ -74,5 +59,12 @@ export default function Bigboi({ user }) {
       </div>
     </div>
   );
-}
+};
 
+const Bigboi = ({ session, user }) => (
+  <SessionProvider session={session}>
+    <BigboiContent user={user} />
+  </SessionProvider>
+);
+
+export default Bigboi;
