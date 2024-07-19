@@ -58,6 +58,7 @@ const BigboiContent = ({ user }) => {
         </div>
       </div>
     </div>
+    
   );
 };
 
