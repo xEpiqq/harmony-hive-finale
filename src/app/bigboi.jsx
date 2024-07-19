@@ -67,7 +67,7 @@ export default function Bigboi({ user }) {
                   fill="#34A853"
                 />
               </svg>
-              <span className="text-sm font-semibold leading-6">Sign in with Google</span>
+              <span className="text-sm font-semibold leading-6">Sign in with Google!</span>
             </button>
           </div>
         </div>
