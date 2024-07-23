@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { doc, getDoc, updateDoc, collection, addDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, addDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firestoreAdapter";
 
 export async function POST(request) {
@@ -27,7 +27,7 @@ export async function POST(request) {
       await updateDoc(userDocRef, { choirs: choirs });
       
       // Creating channels and messages collection
-      const channels = ["Main", "Sopranos", "Altos", "Tenors", "Basses"];
+      const channels = ["main", "soprano", "alto", "tenor", "bass"];
       const systemAvatarUrl = "https://firebasestorage.googleapis.com/v0/b/harmonyhive-b4705.appspot.com/o/system.png?alt=media&token=6fcc64dd-b9dc-4cc8-af7d-032fb7e9462e";
       const systemUser = {
         id: "system",
@@ -36,12 +36,13 @@ export async function POST(request) {
       };
 
       for (const channel of channels) {
-        const channelDocRef = await addDoc(collection(db, `choirs/${newChoirId}/channels`), {
-          name: channel
+        const channelDocRef = doc(db, `choirs/${newChoirId}/channels`, channel);
+        await setDoc(channelDocRef, {
+          name: channel.charAt(0).toUpperCase() + channel.slice(1)
         });
         await addDoc(collection(db, channelDocRef.path, "messages"), {
           createdAt: new Date(),
-          message: "Welcome to the " + channel + " channel!",
+          message: `Welcome to the ${channel} channel!`,
           user: systemUser
         });
       }
